@@ -6,7 +6,7 @@ Application console interactive de génération et résolution de grilles Sudoku
 
 ```bash
 # Cloner le projet
-git clone https://github.com/votre-utilisateur/Sudoku.git
+git clone git@github.com:ludivine-mauget/TDD-sudoku-do-it.git
 
 # Aller dans le répertoire
 cd Path/To/Sudoku
