@@ -149,3 +149,29 @@ dotnet test
 - [ ] Personnalisation des thèmes
 - [ ] Validation en temps réel avec indication des erreurs
 
+## 🐳 Docker
+
+### Lancement avec Docker Compose
+
+Depuis la racine du projet :
+
+```bash
+# Construire et démarrer tous les services
+docker compose up --build
+
+# Ou en arrière-plan
+docker compose up -d --build
+```
+
+L'application sera accessible sur :
+- **Client** : http://localhost:8080
+- **API** : http://localhost:5050
+
+### Construction manuelle de l'image
+
+```bash
+# Depuis la racine du projet
+docker build -t sudoku-client -f Sudoku.Client/Dockerfile .
+docker run -p 8080:80 sudoku-client
+```
+

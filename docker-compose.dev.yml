@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Configuration pour le développement local
+services:
+  # API Backend (mode développement)
+  sudoku-api:
+    build:
+      context: .
+      dockerfile: Sudoku.API/Dockerfile
+    container_name: sudoku-api-dev
+    ports:
+      - "5050:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - sudoku-network-dev
+    volumes:
+      # Mount pour hot reload (optionnel, nécessite modification du Dockerfile)
+      - ./Sudoku.API:/src/Sudoku.API:ro
+      - ./Sudoku:/src/Sudoku:ro
+
+  # Client Blazor WebAssembly (mode développement)
+  sudoku-client:
+    build:
+      context: .
+      dockerfile: Sudoku.Client/Dockerfile
+    container_name: sudoku-client-dev
+    ports:
+      - "8080:80"
+    depends_on:
+      - sudoku-api
+    networks:
+      - sudoku-network-dev
+
+networks:
+  sudoku-network-dev:
+    driver: bridge
+

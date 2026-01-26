@@ -68,5 +68,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Health check endpoint pour Docker et Kubernetes
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
+   .WithTags("Health")
+   .WithName("HealthCheck");
+
 app.Run();
 
