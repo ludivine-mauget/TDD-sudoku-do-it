@@ -29,7 +29,7 @@ public class SudokuController(ISudokuService sudokuService, ILogger<SudokuContro
         catch (Exception ex)
         {
             logger.LogError(ex, "Erreur lors de la génération du puzzle");
-            return StatusCode(500, new { message = "Erreur lors de la génération du puzzle", error = ex.Message });
+            return StatusCode(500, new { message = "Erreur lors de la génération du puzzle" });
         }
     }
 
@@ -52,7 +52,7 @@ public class SudokuController(ISudokuService sudokuService, ILogger<SudokuContro
         catch (Exception ex)
         {
             logger.LogError(ex, "Erreur lors de la résolution du puzzle");
-            return StatusCode(500, new { message = "Erreur lors de la résolution du puzzle", error = ex.Message });
+            return StatusCode(500, new { message = "Erreur lors de la résolution du puzzle" });
         }
     }
 
@@ -75,7 +75,7 @@ public class SudokuController(ISudokuService sudokuService, ILogger<SudokuContro
         catch (Exception ex)
         {
             logger.LogError(ex, "Erreur lors de la validation de la solution");
-            return StatusCode(500, new { message = "Erreur lors de la validation", error = ex.Message });
+            return StatusCode(500, new { message = "Erreur lors de la validation" });
         }
     }
 

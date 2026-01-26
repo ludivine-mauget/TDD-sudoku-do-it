@@ -67,7 +67,7 @@
         StateHasChanged();
 
         await Task.Delay(10);
-        await JS.InvokeVoidAsync("eval", $"document.querySelector('.cell.editing input')?.focus()");
+        await JS.InvokeVoidAsync("sudokuFunctions.focusEditingCell");
     }
 
     private async Task OnBlur()
