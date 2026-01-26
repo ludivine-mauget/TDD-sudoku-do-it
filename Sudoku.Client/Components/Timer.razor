@@ -2,14 +2,16 @@
 
 <div class="timer">
     <span class="timer-icon">⏱️</span>
-    <span class="timer-value">@FormatTime(_elapsedSeconds)</span>
+    <span class="timer-value">@FormatTime(ElapsedTime)</span>
 </div>
 
 @code {
     [Parameter]
     public bool IsActive { get; set; }
 
-    private int _elapsedSeconds = 0;
+    [Parameter]
+    public TimeSpan ElapsedTime { get; set; }
+
     private System.Threading.Timer? _timer;
 
     protected override void OnInitialized()
@@ -18,25 +20,14 @@
         {
             if (IsActive)
             {
-                _elapsedSeconds++;
                 InvokeAsync(StateHasChanged);
             }
         }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
     }
 
-    protected override void OnParametersSet()
+    private string FormatTime(TimeSpan time)
     {
-        if (!IsActive)
-        {
-            _elapsedSeconds = 0;
-        }
-    }
-
-    private string FormatTime(int seconds)
-    {
-        var minutes = seconds / 60;
-        var secs = seconds % 60;
-        return $"{minutes:D2}:{secs:D2}";
+        return $"{(int)time.TotalMinutes:D2}:{time.Seconds:D2}";
     }
 
     public void Dispose()

@@ -99,6 +99,20 @@ public class GameStateService
         NotifyStateChanged();
     }
 
+    public void ClearGame()
+    {
+        CurrentGrid = null;
+        _initialGrid = null;
+        FixedCells = null;
+        _moveHistory.Clear();
+        _currentMoveIndex = -1;
+        _gameStopwatch.Stop();
+        _gameStopwatch.Reset();
+        IsGameActive = false;
+
+        NotifyStateChanged();
+    }
+
     public void SetSolution(Grid solution)
     {
         CurrentGrid = solution.Clone();

@@ -177,7 +177,7 @@ jobs:
         run: dotnet restore Sudoku.sln
 
       - name: Check code formatting
-        run: dotnet format Sudoku.sln --verify-no-changes --verbosity diagnostic || echo "Code formatting issues found"
+        run: dotnet format Sudoku.sln --verify-no-changes --verbosity diagnostic
 
   # ==================== DEPLOY (OPTIONAL) ====================
   deploy:
