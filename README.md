@@ -2,46 +2,70 @@
 
 Application Sudoku complète avec générateur, solveur, API REST et interface web Blazor WebAssembly, développée en **Test-Driven Development (TDD)**.
 
+---
+
+## 📦 Installation
+
+```bash
+# Cloner le projet
+git clone git@github.com:ludivine-mauget/TDD-sudoku-do-it.git
+cd TDD-sudoku-do-it
+```
+
+---
+
 ## 🚀 Démarrage Rapide
 
-### Lancer l'application web complète
+### Option 1 : Application Web Complète (Recommandé)
 
 ```bash
 # Script automatique (démarre API + Client)
 ./start-full-app.sh
 ```
 
-Ou manuellement :
+**URLs disponibles :**
+- 🌐 **Client Blazor** : `http://localhost:5xxx` (voir logs)
+- 🔌 **API** : `http://localhost:5000`
+
+**Logs :**
+```bash
+tail -f api.log     # Logs de l'API
+tail -f client.log  # Logs du client
+```
+
+### Option 2 : Démarrage Manuel
 
 ```bash
 # Terminal 1 - API
 cd Sudoku.API
-dotnet run
+dotnet run --urls "http://localhost:5000"
 
 # Terminal 2 - Client Blazor
 cd Sudoku.Client
 dotnet run
 ```
-# Cloner le projet
-git clone git@github.com:ludivine-mauget/TDD-sudoku-do-it.git
 
-Ensuite, ouvrez votre navigateur à l'URL affichée (généralement `http://localhost:5xxx`)
+Ensuite, ouvrez votre navigateur à l'URL affichée.
 
-### Lancer l'application console
+### Option 3 : Application Console
 
 ```bash
 # Lancer l'application console interactive
 dotnet run --project Sudoku
+```
 
-# Lancer les tests
+### 🧪 Lancer les Tests
+
+```bash
 dotnet test
 ```
 
-📖 **Pour plus de détails, consultez [`QUICK_START.md`](QUICK_START.md)**
+
+---
 
 ## ✨ Fonctionnalités
 
-### 🌐 Application Web (Blazor WASM) - **NOUVEAU !**
+### 🌐 Application Web (Blazor WASM)
 
 - 🎨 **Interface interactive** : Cliquez pour modifier les cellules
 - 🎲 **4 niveaux de difficulté** : Facile, Moyen, Difficile, Expert
@@ -66,6 +90,8 @@ dotnet test
 - `POST /api/sudoku/solve` - Résout une grille
 - `POST /api/sudoku/validate` - Valide une grille
 
+---
+
 ## 🏗️ Architecture
 
 ```plaintext
@@ -74,38 +100,35 @@ Sudoku/
 │   ├── Models/          # Structures de données (Cell, Grid)
 │   ├── Solver/          # Algorithme de résolution (backtracking)
 │   ├── Generator/       # Génération de grilles
-│   └── Display/         # Affichage console
+│   └── Constants/       # Constantes de la grille
 │
 ├── Sudoku.API/          # API REST (ASP.NET Core)
 │   ├── Controllers/     # Endpoints API
 │   ├── Services/        # Logique métier
-│   └── DTOs/            # Objets de transfert
+│   ├── DTOs/            # Objets de transfert
+│   └── Extensions/      # Extensions utilitaires
 │
-├── Sudoku.Client/       # Client Blazor WebAssembly ✨
+├── Sudoku.Client/       # Client Blazor WebAssembly
 │   ├── Components/      # Composants Razor réutilisables
 │   ├── Pages/           # Pages de l'application
 │   ├── Services/        # API Client + Game State
 │   └── wwwroot/         # Ressources statiques (CSS, images)
 │
 └── Sudoku.Tests/        # Tests unitaires
+    ├── CellTests.cs
     ├── GridTests.cs
     ├── SolverTests.cs
-    └── GeneratorTests.cs
+    ├── GeneratorTests.cs
+    ├── ValidationTests.cs
+    ├── Helpers/
+    └── TestData/
 ```
-└── Program.cs       → Application console avec menu
 
-Sudoku.Tests/
-├── CellTests.cs
-├── GridTests.cs
-├── SolverTests.cs
-├── GeneratorTests.cs
-├── Helpers/
-└── TestData/
-```
+---
 
 ## 🎓 Développement TDD
 
-Ce projet a été développé en suivant la méthodologie **Test-Driven Development** :
+La méthodologie **Test-Driven Development** a été appliquée pour le développement du **backend** (bibliothèque de base), notamment pour le **solveur** et le **générateur** de grilles :
 
 1. **Red** 🔴 : Écriture des tests avant le code
 2. **Green** 🟢 : Implémentation minimale pour passer les tests
@@ -116,14 +139,19 @@ Ce projet a été développé en suivant la méthodologie **Test-Driven Developm
 - Tests de validation (IsValid, IsComplete, IsSolved) écrits avant l'implémentation
 - Tests d'exceptions avant la gestion des erreurs
 - Tests de génération avec solution unique avant l'algorithme
-- Tests d'affichage avant la création de GridDisplay
+
+---
 
 ## 🔧 Technologies
 
 - **C# / .NET 9.0**
+- **ASP.NET Core** pour l'API REST
+- **Blazor WebAssembly** pour le client web
 - **xUnit** pour les tests unitaires
 - **Backtracking** pour la résolution
 - **Algorithmes récursifs** pour la génération
+
+---
 
 ## 🧪 Tests
 
@@ -139,14 +167,26 @@ Suite de tests complète avec **65 tests unitaires** couvrant :
 dotnet test
 ```
 
+---
+
 ## 📊 Projet
 
-Ce projet a été réalisé dans le cadre d'un **POK** pour mettre en pratique le **Test-Driven Development**.
+Ce projet a été réalisé dans le cadre de plusieurs **POK** et **MON** à Centrale Méditerranée :
 
-- **Durée** : ~20 heures
-- **MVP Initial** : Modélisation + Solver
-- **Objectif Final** : Générateur avec solution unique
-- **Bonus** : Interface console interactive
+### 📌 POK 1 - Test-Driven Development
+- **Objectif** : Mettre en pratique le TDD
+- **Réalisations** : Modélisation des données, solveur et générateur de grilles
+- **Durée** : ~10 heures
+
+### 📌 POK 2 - API & Blazor WebAssembly
+- **Objectif** : Développer une API REST et découvrir Blazor WebAssembly
+- **Réalisations** : API ASP.NET Core + Interface web interactive
+- **Durée** : ~10 heures
+
+### 📌 MON 2 - CI/CD avec Docker & GitHub Actions
+- **Objectif** : Explorer la CI/CD
+- **Réalisations** : Conteneurisation avec Docker, pipeline GitHub Actions
+- **Durée** : ~10 heures
 
 ### 👩‍💻 Auteur
 
