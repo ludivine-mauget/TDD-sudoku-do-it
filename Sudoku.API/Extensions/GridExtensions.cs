@@ -8,7 +8,7 @@ public static class GridExtensions
 {
     public static GridDto ToGridDto(this Grid grid)
     {
-        var gridDto = new GridDto();
+        var gridDto = GridDto.CreateEmpty();
         for (var row = 0; row < GridConstants.GridSize; row++)
         {
             for (var col = 0; col < GridConstants.GridSize; col++)

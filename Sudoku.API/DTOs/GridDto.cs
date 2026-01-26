@@ -10,16 +10,21 @@ public class GridDto : IValidatableObject
     [Required(ErrorMessage = "La grille est requise")]
     public CellDto[][] Cells { get; set; } = new CellDto[9][];
 
-    public GridDto()
+    /// <summary>
+    /// Crée une grille vide avec toutes les cellules initialisées.
+    /// </summary>
+    public static GridDto CreateEmpty()
     {
+        var grid = new GridDto();
         for (var i = 0; i < 9; i++)
         {
-            Cells[i] = new CellDto[9];
+            grid.Cells[i] = new CellDto[9];
             for (var j = 0; j < 9; j++)
             {
-                Cells[i][j] = new CellDto();
+                grid.Cells[i][j] = new CellDto();
             }
         }
+        return grid;
     }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
