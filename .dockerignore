@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# Build results
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# IDE
+.idea/
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Test results
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+api.log
+client.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Scripts shell locaux
+*.sh
+
+# Fichiers de test
+test_*.json
+
+# NuGet
+*.nupkg
+project.lock.json
+

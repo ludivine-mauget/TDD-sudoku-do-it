@@ -1,0 +1,177 @@
+﻿@page "/"
+@inject Services.ISudokuApiClient ApiClient
+@inject Services.GameStateService GameState
+@implements IDisposable
+
+<PageTitle>Sudoku Game</PageTitle>
+
+<div class="sudoku-container">
+    <h1>Sudoku</h1>
+    
+    <DifficultySelector OnDifficultySelected="OnDifficultySelected" IsLoading="@_isLoading" />
+    
+    @if (GameState.CurrentGrid != null)
+    {
+        <div class="game-area">
+            <div class="game-header">
+                <Timer IsActive="@GameState.IsGameActive" ElapsedTime="@GameState.ElapsedTime" />
+            </div>
+            
+            <SudokuGrid Grid="@GameState.CurrentGrid" 
+                       FixedCells="@GameState.FixedCells"
+                       OnCellValueChanged="@OnCellValueChanged" />
+            
+            <GameControls OnNewGame="@StartNewGame"
+                         OnSolve="@SolveGrid"
+                         OnValidate="@ValidateGrid"
+                         OnReset="@ResetGrid"
+                         OnUndo="@UndoMove"
+                         OnRedo="@RedoMove"
+                         CanUndo="@GameState.CanUndo"
+                         CanRedo="@GameState.CanRedo"
+                         IsLoading="@_isLoading" />
+            
+            @if (!string.IsNullOrEmpty(_message))
+            {
+                <div class="message @_messageClass">@_message</div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="welcome-message">
+            <p>Sélectionnez une difficulté pour commencer une nouvelle partie</p>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isLoading;
+    private string _message = "";
+    private string _messageClass = "";
+
+    protected override void OnInitialized()
+    {
+        GameState.OnStateChanged += StateHasChanged;
+    }
+
+    private async Task OnDifficultySelected(int difficulty)
+    {
+        _isLoading = true;
+        _message = "";
+        StateHasChanged();
+
+        var result = await ApiClient.GenerateAsync(difficulty);
+        
+        if (result.Success && result.Data != null)
+        {
+            GameState.StartNewGame(result.Data);
+            _message = "Nouvelle partie démarrée !";
+            _messageClass = "success";
+        }
+        else
+        {
+            _message = result.ErrorMessage ?? "Erreur lors de la génération de la grille";
+            _messageClass = "error";
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void OnCellValueChanged((int row, int col, int value) cellData)
+    {
+        GameState.SetCellValue(cellData.row, cellData.col, cellData.value);
+        _message = "";
+    }
+
+    private void StartNewGame()
+    {
+        GameState.ClearGame();
+        _message = "";
+        StateHasChanged();
+    }
+
+    private async Task SolveGrid()
+    {
+        if (GameState.CurrentGrid == null || _isLoading)
+            return;
+
+        _isLoading = true;
+        _message = "";
+        StateHasChanged();
+
+        var result = await ApiClient.SolveAsync(GameState.CurrentGrid);
+
+        if (result.Success && result.Data.IsSolved)
+        {
+            GameState.SetSolution(result.Data.Solution);
+            _message = "Grille résolue !";
+            _messageClass = "success";
+        }
+        else if (result.Success)
+        {
+            _message = "Cette grille n'a pas de solution";
+            _messageClass = "error";
+        }
+        else
+        {
+            _message = result.ErrorMessage ?? "Erreur lors de la résolution";
+            _messageClass = "error";
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task ValidateGrid()
+    {
+        if (GameState.CurrentGrid == null || _isLoading)
+            return;
+
+        _isLoading = true;
+        _message = "";
+        StateHasChanged();
+
+        var result = await ApiClient.ValidateAsync(GameState.CurrentGrid);
+
+        if (result.Success)
+        {
+            _message = result.Data ? "Bravo ! La solution est correcte !" : "La solution contient des erreurs";
+            _messageClass = result.Data ? "success" : "error";
+        }
+        else
+        {
+            _message = result.ErrorMessage ?? "Erreur lors de la validation";
+            _messageClass = "error";
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ResetGrid()
+    {
+        GameState.Reset();
+        _message = "Grille réinitialisée";
+        _messageClass = "info";
+    }
+
+    private void UndoMove()
+    {
+        GameState.Undo();
+        _message = "";
+    }
+
+    private void RedoMove()
+    {
+        GameState.Redo();
+        _message = "";
+    }
+
+    public void Dispose()
+    {
+        GameState.OnStateChanged -= StateHasChanged;
+    }
+}
+
