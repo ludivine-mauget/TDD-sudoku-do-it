@@ -1,29 +1,11 @@
-@inject IJSRuntime JS
-
 <div class="cell @GetCellClasses()" @onclick="OnCellClick">
     @if (Value != 0)
     {
         <span>@Value</span>
     }
-    else if (_isEditing)
-    {
-        <input type="number" 
-               min="0" 
-               max="9" 
-               @bind="_tempValue" 
-               @bind:event="oninput"
-               @onblur="OnBlur"
-               @onkeydown="OnKeyDown"
-               @ref="_inputRef"
-               class="cell-input" />
-    }
 </div>
 
 @code {
-    private ElementReference _inputRef;
-    private bool _isEditing;
-    private int _tempValue;
-
     [Parameter]
     public int Row { get; set; }
 
@@ -37,7 +19,10 @@
     public bool IsFixed { get; set; }
 
     [Parameter]
-    public EventCallback<int> OnValueChanged { get; set; }
+    public bool IsSelected { get; set; }
+
+    [Parameter]
+    public EventCallback OnSelected { get; set; }
 
     private string GetCellClasses()
     {
@@ -46,8 +31,8 @@
         if (IsFixed)
             classes.Add("fixed");
 
-        if (_isEditing)
-            classes.Add("editing");
+        if (IsSelected)
+            classes.Add("selected");
 
         if (Row % 3 == 0 && Row != 0)
             classes.Add("border-top");
@@ -59,45 +44,10 @@
 
     private async Task OnCellClick()
     {
-        if (IsFixed || _isEditing)
+        if (IsFixed)
             return;
 
-        _isEditing = true;
-        _tempValue = Value;
-        StateHasChanged();
-
-        await Task.Delay(10);
-        await JS.InvokeVoidAsync("sudokuFunctions.focusEditingCell");
-    }
-
-    private async Task OnBlur()
-    {
-        await CommitValue();
-    }
-
-    private async Task OnKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" || e.Key == "Escape")
-        {
-            await CommitValue();
-        }
-    }
-
-    private async Task CommitValue()
-    {
-        if (!_isEditing)
-            return;
-
-        _isEditing = false;
-
-        var newValue = Math.Max(0, Math.Min(9, _tempValue));
-
-        if (newValue != Value)
-        {
-            await OnValueChanged.InvokeAsync(newValue);
-        }
-
-        StateHasChanged();
+        await OnSelected.InvokeAsync();
     }
 }
 

@@ -1,25 +1,52 @@
 @using Sudoku.Models
 
-<div class="sudoku-grid">
-    @for (int row = 0; row < 9; row++)
-    {
-        var currentRow = row;
-        @for (int col = 0; col < 9; col++)
+<div class="sudoku-game-wrapper">
+    <div class="sudoku-grid">
+        @for (int row = 0; row < 9; row++)
         {
-            var currentCol = col;
-            var cellValue = Grid.GetCellNumber(currentRow, currentCol);
-            var isFixed = FixedCells?[currentRow, currentCol] ?? false;
-            
-            <CellComponent Row="@currentRow"
-                          Col="@currentCol"
-                          Value="@cellValue"
-                          IsFixed="@isFixed"
-                          OnValueChanged="@((value) => OnCellValueChanged.InvokeAsync((currentRow, currentCol, value)))" />
+            var currentRow = row;
+            @for (int col = 0; col < 9; col++)
+            {
+                var currentCol = col;
+                var cellValue = Grid.GetCellNumber(currentRow, currentCol);
+                var isFixed = FixedCells?[currentRow, currentCol] ?? false;
+                var isSelected = _selectedRow == currentRow && _selectedCol == currentCol;
+                
+                <CellComponent Row="@currentRow"
+                              Col="@currentCol"
+                              Value="@cellValue"
+                              IsFixed="@isFixed"
+                              IsSelected="@isSelected"
+                              OnSelected="@(() => SelectCell(currentRow, currentCol))" />
+            }
         }
-    }
+    </div>
+    
+    <div class="number-selector">
+        <div class="number-selector-title">Chiffres</div>
+        @for (int num = 1; num <= 9; num++)
+        {
+            var number = num;
+            <button class="number-btn @(HasSelectedCell ? "" : "disabled")" 
+                    @onclick="@(() => SetNumber(number))"
+                    disabled="@(!HasSelectedCell)">
+                @number
+            </button>
+        }
+        <button class="number-btn clear-btn @(HasSelectedCell ? "" : "disabled")" 
+                @onclick="@(() => SetNumber(0))"
+                disabled="@(!HasSelectedCell)">
+            ✕
+        </button>
+    </div>
 </div>
 
 @code {
+    private int? _selectedRow;
+    private int? _selectedCol;
+
+    private bool HasSelectedCell => _selectedRow.HasValue && _selectedCol.HasValue;
+
     [Parameter]
     public Grid Grid { get; set; } = null!;
 
@@ -28,5 +55,25 @@
 
     [Parameter]
     public EventCallback<(int row, int col, int value)> OnCellValueChanged { get; set; }
+
+    private void SelectCell(int row, int col)
+    {
+        _selectedRow = row;
+        _selectedCol = col;
+    }
+
+    private async Task SetNumber(int number)
+    {
+        if (!HasSelectedCell)
+            return;
+
+        await OnCellValueChanged.InvokeAsync((_selectedRow!.Value, _selectedCol!.Value, number));
+    }
+
+    public void ClearSelection()
+    {
+        _selectedRow = null;
+        _selectedCol = null;
+    }
 }
 
