@@ -14,10 +14,11 @@
     {
         <div class="game-area">
             <div class="game-header">
-                <Timer IsActive="@GameState.IsGameActive" ElapsedTime="@GameState.ElapsedTime" />
+                <Timer IsActive="@GameState.IsGameActive" ElapsedTime="@GameState.ElapsedTime" OnTick="@StateHasChanged" />
             </div>
             
-            <SudokuGrid Grid="@GameState.CurrentGrid" 
+            <SudokuGrid @ref="_sudokuGrid"
+                       Grid="@GameState.CurrentGrid" 
                        FixedCells="@GameState.FixedCells"
                        OnCellValueChanged="@OnCellValueChanged" />
             
@@ -46,6 +47,7 @@
 </div>
 
 @code {
+    private SudokuGrid? _sudokuGrid;
     private bool _isLoading;
     private string _message = "";
     private string _messageClass = "";
@@ -88,6 +90,7 @@
     private void StartNewGame()
     {
         GameState.ClearGame();
+        _sudokuGrid?.ClearSelection();
         _message = "";
         StateHasChanged();
     }
@@ -153,6 +156,7 @@
     private void ResetGrid()
     {
         GameState.Reset();
+        _sudokuGrid?.ClearSelection();
         _message = "Grille réinitialisée";
         _messageClass = "info";
     }
