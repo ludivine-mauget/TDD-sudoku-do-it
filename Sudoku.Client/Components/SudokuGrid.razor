@@ -125,6 +125,9 @@
         if (!HasSelectedCell)
             return;
 
+        if (FixedCells?[_selectedRow!.Value, _selectedCol!.Value] == true)
+            return;
+
         await OnCellValueChanged.InvokeAsync((_selectedRow!.Value, _selectedCol!.Value, number));
         StateHasChanged();
     }

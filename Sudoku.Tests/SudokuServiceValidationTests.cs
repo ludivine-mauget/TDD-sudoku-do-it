@@ -114,12 +114,12 @@ public class SudokuServiceValidationTests
 
     private static GridDto CreateEmptyGridDto()
     {
-        return GridDto.CreateEmpty();
+        return new GridDto();
     }
 
     private static GridDto ConvertGridToDto(Grid grid)
     {
-        var gridDto = GridDto.CreateEmpty();
+        var gridDto = new GridDto();
         for (var row = 0; row < 9; row++)
         {
             for (var col = 0; col < 9; col++)
