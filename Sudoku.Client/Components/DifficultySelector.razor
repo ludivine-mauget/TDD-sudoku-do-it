@@ -1,0 +1,38 @@
+<div class="difficulty-selector">
+    <h3>Sélectionnez la difficulté</h3>
+    <div class="difficulty-buttons">
+        <button class="difficulty-btn easy" @onclick="@(() => SelectDifficulty(30))" disabled="@IsLoading">
+            Facile (30 cases)
+        </button>
+        <button class="difficulty-btn medium" @onclick="@(() => SelectDifficulty(40))" disabled="@IsLoading">
+            Moyen (40 cases)
+        </button>
+        <button class="difficulty-btn hard" @onclick="@(() => SelectDifficulty(50))" disabled="@IsLoading">
+            Difficile (50 cases)
+        </button>
+        <button class="difficulty-btn expert" @onclick="@(() => SelectDifficulty(60))" disabled="@IsLoading">
+            Expert (60 cases)
+        </button>
+    </div>
+    @if (IsLoading)
+    {
+        <div class="loading-spinner">Génération en cours...</div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<int> OnDifficultySelected { get; set; }
+    
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    private async Task SelectDifficulty(int difficulty)
+    {
+        if (!IsLoading)
+        {
+            await OnDifficultySelected.InvokeAsync(difficulty);
+        }
+    }
+}
+

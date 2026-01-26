@@ -1,0 +1,54 @@
+<div class="game-controls">
+    <div class="control-group">
+        <button class="btn btn-primary" @onclick="OnNewGame" disabled="@IsLoading">
+            🎮 Nouvelle partie
+        </button>
+        <button class="btn btn-info" @onclick="OnValidate" disabled="@IsLoading">
+            ✓ Valider
+        </button>
+        <button class="btn btn-success" @onclick="OnSolve" disabled="@IsLoading">
+            💡 Résoudre
+        </button>
+        <button class="btn btn-warning" @onclick="OnReset" disabled="@IsLoading">
+            🔄 Réinitialiser
+        </button>
+    </div>
+    <div class="control-group">
+        <button class="btn btn-secondary" @onclick="OnUndo" disabled="@(!CanUndo || IsLoading)">
+            ↶ Annuler
+        </button>
+        <button class="btn btn-secondary" @onclick="OnRedo" disabled="@(!CanRedo || IsLoading)">
+            ↷ Refaire
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnNewGame { get; set; }
+    
+    [Parameter]
+    public EventCallback OnSolve { get; set; }
+    
+    [Parameter]
+    public EventCallback OnValidate { get; set; }
+    
+    [Parameter]
+    public EventCallback OnReset { get; set; }
+    
+    [Parameter]
+    public EventCallback OnUndo { get; set; }
+    
+    [Parameter]
+    public EventCallback OnRedo { get; set; }
+    
+    [Parameter]
+    public bool CanUndo { get; set; }
+    
+    [Parameter]
+    public bool CanRedo { get; set; }
+    
+    [Parameter]
+    public bool IsLoading { get; set; }
+}
+

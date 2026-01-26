@@ -63,21 +63,23 @@ public class SudokuService(ILogger<SudokuService> logger) : ISudokuService
             logger.LogInformation("Validation d'une solution");
 
             var grid = gridDto.ToGrid();
-            var isValid = grid.IsValid();
             var isComplete = grid.IsComplete();
+            var hasNoConflicts = grid.IsValid();
             var errors = new List<CellErrorDto>();
 
-            if (!isValid)
+            if (!hasNoConflicts)
             {
                 errors = FindErrors(grid);
             }
 
+            var isValid = isComplete && hasNoConflicts;
+
             string message;
-            if (isComplete && isValid)
+            if (isValid)
             {
                 message = "Félicitations ! Le puzzle est résolu correctement.";
             }
-            else if (!isValid)
+            else if (!hasNoConflicts)
             {
                 message = $"La solution contient {errors.Count} erreur(s).";
             }

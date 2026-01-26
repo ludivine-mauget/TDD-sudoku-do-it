@@ -14,7 +14,7 @@ public class SudokuController(ISudokuService sudokuService, ILogger<SudokuContro
     /// Génère un nouveau puzzle Sudoku
     /// </summary>
     /// <param name="request">Paramètres de génération du puzzle</param>
-    [HttpPost]
+    [HttpPost("generate")]
     [ProducesResponseType(typeof(SudokuResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

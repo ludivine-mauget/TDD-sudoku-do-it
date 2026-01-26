@@ -1,0 +1,32 @@
+@using Sudoku.Models
+
+<div class="sudoku-grid">
+    @for (int row = 0; row < 9; row++)
+    {
+        var currentRow = row;
+        @for (int col = 0; col < 9; col++)
+        {
+            var currentCol = col;
+            var cellValue = Grid.GetCellNumber(currentRow, currentCol);
+            var isFixed = FixedCells?[currentRow, currentCol] ?? false;
+            
+            <CellComponent Row="@currentRow"
+                          Col="@currentCol"
+                          Value="@cellValue"
+                          IsFixed="@isFixed"
+                          OnValueChanged="@((value) => OnCellValueChanged.InvokeAsync((currentRow, currentCol, value)))" />
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Grid Grid { get; set; } = null!;
+
+    [Parameter]
+    public bool[,]? FixedCells { get; set; }
+
+    [Parameter]
+    public EventCallback<(int row, int col, int value)> OnCellValueChanged { get; set; }
+}
+

@@ -262,4 +262,23 @@ public class Grid
         }
         return subGridCells;
     }
+
+    // Méthodes publiques pour l'accès depuis le client Blazor
+    public void SetCellNumber(int row, int col, int value)
+    {
+        if (row >= 0 && row < 9 && col >= 0 && col < 9)
+        {
+            Cells[row, col].Number = value == 0 ? null : value;
+        }
+    }
+
+    public int GetCellNumber(int row, int col)
+    {
+        if (row is < 0 or >= 9) return 0;
+        if (col is >= 0 and < 9)
+        {
+            return Cells[row, col].Number ?? 0;
+        }
+        return 0;
+    }
 }
