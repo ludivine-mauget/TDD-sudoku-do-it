@@ -22,6 +22,8 @@ dotnet run
 cd Sudoku.Client
 dotnet run
 ```
+# Cloner le projet
+git clone git@github.com:ludivine-mauget/TDD-sudoku-do-it.git
 
 Ensuite, ouvrez votre navigateur à l'URL affichée (généralement `http://localhost:5xxx`)
 
