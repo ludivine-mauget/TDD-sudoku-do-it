@@ -67,14 +67,20 @@ public class SudokuApiClient(HttpClient httpClient, ILogger<SudokuApiClient> log
             }
             
             var result = await response.Content.ReadFromJsonAsync<SolveResponse>(_jsonOptions);
-            var solution = ConvertGridDtoToGrid(result?.Grid);
+            
+            if (result == null)
+            {
+                return ApiResult<(bool, Grid)>.Error("La réponse du serveur est invalide");
+            }
+            
+            var solution = ConvertGridDtoToGrid(result.Grid);
             
             if (solution == null)
             {
                 return ApiResult<(bool, Grid)>.Error("La réponse du serveur est invalide");
             }
             
-            return ApiResult<(bool, Grid)>.Ok((result?.IsSolved ?? false, solution));
+            return ApiResult<(bool, Grid)>.Ok((result.IsSolved, solution));
         }
         catch (HttpRequestException ex)
         {

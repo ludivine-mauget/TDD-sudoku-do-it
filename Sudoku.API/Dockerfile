@@ -25,6 +25,11 @@ RUN dotnet publish "Sudoku.API.csproj" -c Release -o /app/publish /p:UseAppHost=
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
+
+# Install curl for Docker health checks
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 EXPOSE 8080
 EXPOSE 8081
 

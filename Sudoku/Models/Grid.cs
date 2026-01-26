@@ -268,19 +268,25 @@ public class Grid
     // Méthodes publiques pour l'accès depuis le client Blazor
     public void SetCellNumber(int row, int col, int value)
     {
-        if (row < 0 || row >= GridConstants.GridSize || col < 0 || col >= GridConstants.GridSize)
-            return;
+        if (row < 0 || row >= GridConstants.GridSize)
+            throw new ArgumentOutOfRangeException(nameof(row), $"Row must be between 0 and {GridConstants.GridSize - 1}.");
+        
+        if (col < 0 || col >= GridConstants.GridSize)
+            throw new ArgumentOutOfRangeException(nameof(col), $"Column must be between 0 and {GridConstants.GridSize - 1}.");
         
         if (value < 0 || value > GridConstants.MaxValue)
-            throw new ArgumentOutOfRangeException(nameof(value), $"Value must be between 0 and {GridConstants.MaxValue}");
+            throw new ArgumentOutOfRangeException(nameof(value), $"Value must be between 0 and {GridConstants.MaxValue}.");
         
         Cells[row, col].Number = value == 0 ? null : value;
     }
 
     public int GetCellNumber(int row, int col)
     {
-        if (row < 0 || row >= GridConstants.GridSize || col < 0 || col >= GridConstants.GridSize)
-            return 0;
+        if (row < 0 || row >= GridConstants.GridSize)
+            throw new ArgumentOutOfRangeException(nameof(row), $"Row must be between 0 and {GridConstants.GridSize - 1}.");
+        
+        if (col < 0 || col >= GridConstants.GridSize)
+            throw new ArgumentOutOfRangeException(nameof(col), $"Column must be between 0 and {GridConstants.GridSize - 1}.");
         
         return Cells[row, col].Number ?? 0;
     }

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Sudoku.Constants;
 using Sudoku.Models;
 
@@ -8,7 +9,7 @@ public class GameStateService
     private Grid? _initialGrid;
     private readonly List<GameMove> _moveHistory = [];
     private int _currentMoveIndex = -1;
-    private DateTime _gameStartTime;
+    private readonly Stopwatch _gameStopwatch = new();
 
     public event Action? OnStateChanged;
 
@@ -16,7 +17,7 @@ public class GameStateService
     public bool[,]? FixedCells { get; private set; }
     public bool IsGameActive { get; private set; }
 
-    public TimeSpan ElapsedTime => IsGameActive ? DateTime.Now - _gameStartTime : TimeSpan.Zero;
+    public TimeSpan ElapsedTime => _gameStopwatch.Elapsed;
     public bool CanUndo => _currentMoveIndex >= 0;
     public bool CanRedo => _currentMoveIndex < _moveHistory.Count - 1;
 
@@ -36,7 +37,7 @@ public class GameStateService
 
         _moveHistory.Clear();
         _currentMoveIndex = -1;
-        _gameStartTime = DateTime.Now;
+        _gameStopwatch.Restart();
         IsGameActive = true;
 
         NotifyStateChanged();
@@ -102,6 +103,7 @@ public class GameStateService
     {
         CurrentGrid = solution.Clone();
         IsGameActive = false;
+        _gameStopwatch.Stop();
         NotifyStateChanged();
     }
 
