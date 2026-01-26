@@ -75,14 +75,14 @@
 
 .sudoku-grid {
     display: grid;
-    grid-template-columns: repeat(9, 1fr);
+    grid-template-columns: repeat(9, 50px);
+    grid-template-rows: repeat(9, 50px);
     gap: 0;
-    width: 450px;
-    height: 450px;
+    width: fit-content;
     margin: 20px auto;
-    border: 3px solid #333;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     background: white;
+    border: 3px solid #333;
 }
 
 .cell {
@@ -97,12 +97,16 @@
     cursor: pointer;
     transition: background-color 0.2s;
     position: relative;
+    box-sizing: border-box;
 }
 
+/* Bordures épaisses pour la séparation des blocs 3x3 */
+/* Colonnes 3 et 6 (indices 3n, excluant la dernière colonne 9) */
 .cell:nth-child(3n):not(:nth-child(9n)) {
     border-right: 2px solid #333;
 }
 
+/* Lignes 3 et 6 (cellules 19-27 et 46-54) */
 .cell:nth-child(n + 19):nth-child(-n + 27),
 .cell:nth-child(n + 46):nth-child(-n + 54) {
     border-bottom: 2px solid #333;
