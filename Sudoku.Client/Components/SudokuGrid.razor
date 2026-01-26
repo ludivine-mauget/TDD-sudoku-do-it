@@ -47,6 +47,7 @@
     private int? _selectedRow;
     private int? _selectedCol;
     private ElementReference _wrapperElement;
+    private Grid? _previousGrid;
 
     private bool HasSelectedCell => _selectedRow.HasValue && _selectedCol.HasValue;
 
@@ -58,6 +59,13 @@
 
     [Parameter]
     public EventCallback<(int row, int col, int value)> OnCellValueChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (_previousGrid == Grid) return;
+        ClearSelection();
+        _previousGrid = Grid;
+    }
 
     private async Task SelectCell(int row, int col)
     {
