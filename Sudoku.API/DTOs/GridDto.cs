@@ -5,6 +5,12 @@ namespace Sudoku.API.DTOs;
 public class GridDto : IValidatableObject
 {
     /// <summary>
+    /// Constructeur par défaut requis pour la désérialisation JSON.
+    /// Préférez utiliser <see cref="CreateEmpty"/> pour créer une grille initialisée.
+    /// </summary>
+    public GridDto() { }
+
+    /// <summary>
     /// Matrice 9x9 des cellules du Sudoku
     /// </summary>
     [Required(ErrorMessage = "La grille est requise")]

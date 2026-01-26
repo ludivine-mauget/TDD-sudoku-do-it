@@ -2,7 +2,7 @@ namespace Sudoku.API.DTOs;
 
 public class SudokuResponseDto
 {
-    public GridDto Grid { get; init; } = new();
+    public GridDto Grid { get; init; } = GridDto.CreateEmpty();
     public DifficultyLevel Difficulty { get; init; }
     public int CellsRemoved { get; init; }
     public int CellsFilled { get; init; }
