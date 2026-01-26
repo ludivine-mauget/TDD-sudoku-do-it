@@ -94,14 +94,14 @@
 
     private async Task SolveGrid()
     {
-        if (GameState.CurrentGrid == null || _isLoading)
+        if (GameState.InitialGrid == null || _isLoading)
             return;
 
         _isLoading = true;
         _message = "";
         StateHasChanged();
 
-        var result = await ApiClient.SolveAsync(GameState.CurrentGrid);
+        var result = await ApiClient.SolveAsync(GameState.InitialGrid);
 
         if (result.Success && result.Data.IsSolved)
         {
