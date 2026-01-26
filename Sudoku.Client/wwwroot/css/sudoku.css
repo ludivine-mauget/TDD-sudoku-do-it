@@ -97,7 +97,10 @@
 .cell {
     width: 100%;
     height: 100%;
-    aspect-ratio: 1;
+    /* Fallback for browsers that don't support aspect-ratio (pre-2021) */
+    /* The grid already ensures equal width/height via grid-template-columns/rows */
+    padding-bottom: 0; /* Reset any padding */
+    aspect-ratio: 1; /* Modern browsers */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -108,6 +111,19 @@
     transition: background-color 0.2s;
     position: relative;
     box-sizing: border-box;
+}
+
+/* Fallback for older browsers without aspect-ratio support */
+@supports not (aspect-ratio: 1) {
+    .cell {
+        height: auto;
+    }
+    
+    .cell::before {
+        content: "";
+        display: block;
+        padding-top: 100%; /* Creates 1:1 aspect ratio */
+    }
 }
 
 /* Bordures épaisses pour la séparation des blocs 3x3 */
