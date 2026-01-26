@@ -144,6 +144,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push ${{ matrix.image }} image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -153,12 +154,14 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          # Pour activer le support ARM64 (Apple Silicon, instances cloud ARM), décommentez :
+          # platforms: linux/amd64,linux/arm64
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image_name }}:latest
+          # Utilise le digest de l'image pour scanner exactement l'image qui vient d'être construite
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image_name }}@${{ steps.build.outputs.digest }}
           format: 'sarif'
           output: 'trivy-results-${{ matrix.image }}.sarif'
           severity: 'CRITICAL,HIGH'
