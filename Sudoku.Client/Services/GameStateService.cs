@@ -1,3 +1,4 @@
+using Sudoku.Constants;
 using Sudoku.Models;
 
 namespace Sudoku.Client.Services;
@@ -23,11 +24,11 @@ public class GameStateService
     {
         CurrentGrid = grid.Clone();
         _initialGrid = grid.Clone();
-        FixedCells = new bool[9, 9];
+        FixedCells = new bool[GridConstants.GridSize, GridConstants.GridSize];
         
-        for (var row = 0; row < 9; row++)
+        for (var row = 0; row < GridConstants.GridSize; row++)
         {
-            for (var col = 0; col < 9; col++)
+            for (var col = 0; col < GridConstants.GridSize; col++)
             {
                 FixedCells[row, col] = grid.GetCellNumber(row, col) != 0;
             }
@@ -122,9 +123,9 @@ public static class GridExtensions
     public static Grid Clone(this Grid grid)
     {
         var clone = new Grid();
-        for (var row = 0; row < 9; row++)
+        for (var row = 0; row < GridConstants.GridSize; row++)
         {
-            for (var col = 0; col < 9; col++)
+            for (var col = 0; col < GridConstants.GridSize; col++)
             {
                 clone.SetCellNumber(row, col, grid.GetCellNumber(row, col));
             }

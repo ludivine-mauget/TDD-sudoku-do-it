@@ -61,17 +61,17 @@
         _message = "";
         StateHasChanged();
 
-        var grid = await ApiClient.GenerateAsync(difficulty);
+        var result = await ApiClient.GenerateAsync(difficulty);
         
-        if (grid != null)
+        if (result.Success && result.Data != null)
         {
-            GameState.StartNewGame(grid);
+            GameState.StartNewGame(result.Data);
             _message = "Nouvelle partie démarrée !";
             _messageClass = "success";
         }
         else
         {
-            _message = "Erreur lors de la génération de la grille";
+            _message = result.ErrorMessage ?? "Erreur lors de la génération de la grille";
             _messageClass = "error";
         }
 
@@ -100,17 +100,22 @@
         _message = "";
         StateHasChanged();
 
-        var (isSolvable, solution) = await ApiClient.SolveAsync(GameState.CurrentGrid);
+        var result = await ApiClient.SolveAsync(GameState.CurrentGrid);
 
-        if (isSolvable && solution != null)
+        if (result.Success && result.Data.IsSolved)
         {
-            GameState.SetSolution(solution);
+            GameState.SetSolution(result.Data.Solution);
             _message = "Grille résolue !";
             _messageClass = "success";
         }
-        else
+        else if (result.Success)
         {
             _message = "Cette grille n'a pas de solution";
+            _messageClass = "error";
+        }
+        else
+        {
+            _message = result.ErrorMessage ?? "Erreur lors de la résolution";
             _messageClass = "error";
         }
 
@@ -127,10 +132,18 @@
         _message = "";
         StateHasChanged();
 
-        var isValid = await ApiClient.ValidateAsync(GameState.CurrentGrid);
+        var result = await ApiClient.ValidateAsync(GameState.CurrentGrid);
 
-        _message = isValid ? "Bravo ! La solution est correcte !" : "La solution contient des erreurs";
-        _messageClass = isValid ? "success" : "error";
+        if (result.Success)
+        {
+            _message = result.Data ? "Bravo ! La solution est correcte !" : "La solution contient des erreurs";
+            _messageClass = result.Data ? "success" : "error";
+        }
+        else
+        {
+            _message = result.ErrorMessage ?? "Erreur lors de la validation";
+            _messageClass = "error";
+        }
 
         _isLoading = false;
         StateHasChanged();

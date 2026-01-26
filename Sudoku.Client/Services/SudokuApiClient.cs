@@ -1,67 +1,128 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Sudoku.Models;
 
 namespace Sudoku.Client.Services;
 
-public class SudokuApiClient(HttpClient httpClient) : ISudokuApiClient
+public class SudokuApiClient(HttpClient httpClient, ILogger<SudokuApiClient> logger) : ISudokuApiClient
 {
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task<Grid?> GenerateAsync(int difficulty)
+    public async Task<ApiResult<Grid>> GenerateAsync(int difficulty)
     {
         try
         {
             var response = await httpClient.PostAsJsonAsync("/api/sudoku/generate", new { cellsToRemove = difficulty });
-            response.EnsureSuccessStatusCode();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = $"Erreur serveur: {response.StatusCode}";
+                logger.LogWarning("Échec de génération: {StatusCode}", response.StatusCode);
+                return ApiResult<Grid>.Error(errorMessage);
+            }
             
             var result = await response.Content.ReadFromJsonAsync<GenerateResponse>(_jsonOptions);
-            return result?.Grid != null ? ConvertGridDtoToGrid(result.Grid) : null;
+            var grid = result?.Grid != null ? ConvertGridDtoToGrid(result.Grid) : null;
+            
+            if (grid == null)
+            {
+                return ApiResult<Grid>.Error("La réponse du serveur est invalide");
+            }
+            
+            return ApiResult<Grid>.Ok(grid);
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "Erreur de connexion lors de la génération");
+            return ApiResult<Grid>.Error("Impossible de se connecter au serveur. Vérifiez votre connexion.");
+        }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogWarning(ex, "Timeout lors de la génération");
+            return ApiResult<Grid>.Error("La requête a pris trop de temps. Réessayez.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error generating sudoku: {ex.Message}");
-            return null;
+            logger.LogError(ex, "Erreur inattendue lors de la génération");
+            return ApiResult<Grid>.Error("Une erreur inattendue s'est produite.");
         }
     }
 
-    public async Task<(bool IsValid, Grid? Solution)> SolveAsync(Grid grid)
+    public async Task<ApiResult<(bool IsSolved, Grid Solution)>> SolveAsync(Grid grid)
     {
         try
         {
             var gridDto = ConvertGridToGridDto(grid);
             var response = await httpClient.PostAsJsonAsync("/api/sudoku/solve", gridDto);
-            response.EnsureSuccessStatusCode();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = $"Erreur serveur: {response.StatusCode}";
+                logger.LogWarning("Échec de résolution: {StatusCode}", response.StatusCode);
+                return ApiResult<(bool, Grid)>.Error(errorMessage);
+            }
             
             var result = await response.Content.ReadFromJsonAsync<SolveResponse>(_jsonOptions);
             var solution = ConvertGridDtoToGrid(result?.Grid);
-            return (result?.IsSolved ?? false, solution);
+            
+            if (solution == null)
+            {
+                return ApiResult<(bool, Grid)>.Error("La réponse du serveur est invalide");
+            }
+            
+            return ApiResult<(bool, Grid)>.Ok((result?.IsSolved ?? false, solution));
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "Erreur de connexion lors de la résolution");
+            return ApiResult<(bool, Grid)>.Error("Impossible de se connecter au serveur.");
+        }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogWarning(ex, "Timeout lors de la résolution");
+            return ApiResult<(bool, Grid)>.Error("La requête a pris trop de temps.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error solving sudoku: {ex.Message}");
-            return (false, null);
+            logger.LogError(ex, "Erreur inattendue lors de la résolution");
+            return ApiResult<(bool, Grid)>.Error("Une erreur inattendue s'est produite.");
         }
     }
 
-    public async Task<bool> ValidateAsync(Grid grid)
+    public async Task<ApiResult<bool>> ValidateAsync(Grid grid)
     {
         try
         {
             var gridDto = ConvertGridToGridDto(grid);
             var response = await httpClient.PostAsJsonAsync("/api/sudoku/validate", gridDto);
-            response.EnsureSuccessStatusCode();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Échec de validation: {StatusCode}", response.StatusCode);
+                return ApiResult<bool>.Error($"Erreur serveur: {response.StatusCode}");
+            }
             
             var result = await response.Content.ReadFromJsonAsync<ValidationResponse>(_jsonOptions);
-            return result?.IsValid ?? false;
+            return ApiResult<bool>.Ok(result?.IsValid ?? false);
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogError(ex, "Erreur de connexion lors de la validation");
+            return ApiResult<bool>.Error("Impossible de se connecter au serveur.");
+        }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogWarning(ex, "Timeout lors de la validation");
+            return ApiResult<bool>.Error("La requête a pris trop de temps.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error validating sudoku: {ex.Message}");
-            return false;
+            logger.LogError(ex, "Erreur inattendue lors de la validation");
+            return ApiResult<bool>.Error("Une erreur inattendue s'est produite.");
         }
     }
 

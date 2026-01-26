@@ -1,3 +1,4 @@
+using Sudoku.Constants;
 using Sudoku.Models;
 
 namespace Sudoku.Solver;
@@ -21,7 +22,7 @@ public class Solver
 
         var (row, col) = emptyCell.Value;
 
-        for (var num = 1; num <= 9; num++)
+        for (var num = GridConstants.MinValue; num <= GridConstants.MaxValue; num++)
         {
             if (!IsValidPlacement(grid, (row, col), num)) continue;
             
@@ -37,9 +38,9 @@ public class Solver
 
     public static (int row, int col)? FindEmptyCell(Grid grid)
     {
-        for (var row = 0; row < 9; row++)
+        for (var row = 0; row < GridConstants.GridSize; row++)
         {
-            for (var col = 0; col < 9; col++)
+            for (var col = 0; col < GridConstants.GridSize; col++)
             {
                 if (!grid.GetCellValue((row, col)).HasValue)
                 {
@@ -78,16 +79,26 @@ public class Solver
         grid.ResetCell(position);
     }
 
-    public int CountSolutions(Grid grid)
+    /// <summary>
+    /// Compte le nombre de solutions d'une grille.
+    /// </summary>
+    /// <param name="grid">La grille à analyser</param>
+    /// <param name="maxSolutions">Nombre maximum de solutions à chercher (optimisation early-exit)</param>
+    /// <returns>Le nombre de solutions trouvées (plafonné à maxSolutions)</returns>
+    public int CountSolutions(Grid grid, int maxSolutions = int.MaxValue)
     {
         var count = 0;
         var gridCopy = new Grid(grid);
-        CountSolutionsRecursive(gridCopy, ref count);
+        CountSolutionsRecursive(gridCopy, ref count, maxSolutions);
         return count;
     }
 
-    private static void CountSolutionsRecursive(Grid gridCopy, ref int count)
+    private static void CountSolutionsRecursive(Grid gridCopy, ref int count, int maxSolutions)
     {
+        // Early-exit : arrêter dès qu'on a atteint le maximum demandé
+        if (count >= maxSolutions)
+            return;
+            
         var emptyCell = FindEmptyCell(gridCopy);
         
         if (emptyCell == null)
@@ -98,18 +109,26 @@ public class Solver
 
         var (row, col) = emptyCell.Value;
 
-        for (var num = 1; num <= 9; num++)
+        for (var num = 1; num <= GridConstants.GridSize; num++)
         {
+            // Early-exit dans la boucle aussi
+            if (count >= maxSolutions)
+                return;
+                
             if (!IsValidPlacement(gridCopy, (row, col), num)) continue;
             
             gridCopy.SetCellValue((row, col), num);
-            CountSolutionsRecursive(gridCopy, ref count);
+            CountSolutionsRecursive(gridCopy, ref count, maxSolutions);
             ResetCell(gridCopy, (row, col));
         }
     }
 
+    /// <summary>
+    /// Vérifie si la grille a exactement une solution unique.
+    /// Optimisé avec early-exit dès qu'on trouve 2 solutions.
+    /// </summary>
     public bool HasUniqueSolution(Grid grid)
     {
-        return CountSolutions(grid) == 1;
+        return CountSolutions(grid, maxSolutions: 2) == 1;
     }
 }
