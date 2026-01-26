@@ -12,6 +12,9 @@
     [Parameter]
     public TimeSpan ElapsedTime { get; set; }
 
+    [Parameter]
+    public EventCallback OnTick { get; set; }
+
     private System.Threading.Timer? _timer;
 
     protected override void OnInitialized()
@@ -20,7 +23,14 @@
         {
             if (IsActive)
             {
-                InvokeAsync(StateHasChanged);
+                _ = InvokeAsync(async () =>
+                {
+                    if (OnTick.HasDelegate)
+                    {
+                        await OnTick.InvokeAsync();
+                    }
+                    StateHasChanged();
+                });
             }
         }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
     }

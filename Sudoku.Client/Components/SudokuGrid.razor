@@ -1,25 +1,56 @@
 @using Sudoku.Models
 
-<div class="sudoku-grid">
-    @for (int row = 0; row < 9; row++)
-    {
-        var currentRow = row;
-        @for (int col = 0; col < 9; col++)
+<div class="sudoku-game-wrapper" tabindex="0" @onkeydown="HandleKeyDown" @ref="_wrapperElement">
+    <div class="sudoku-grid">
+        @for (int row = 0; row < 9; row++)
         {
-            var currentCol = col;
-            var cellValue = Grid.GetCellNumber(currentRow, currentCol);
-            var isFixed = FixedCells?[currentRow, currentCol] ?? false;
-            
-            <CellComponent Row="@currentRow"
-                          Col="@currentCol"
-                          Value="@cellValue"
-                          IsFixed="@isFixed"
-                          OnValueChanged="@((value) => OnCellValueChanged.InvokeAsync((currentRow, currentCol, value)))" />
+            var currentRow = row;
+            @for (int col = 0; col < 9; col++)
+            {
+                var currentCol = col;
+                var cellValue = Grid.GetCellNumber(currentRow, currentCol);
+                var isFixed = FixedCells?[currentRow, currentCol] ?? false;
+                var isSelected = _selectedRow == currentRow && _selectedCol == currentCol;
+                
+                <CellComponent Row="@currentRow"
+                              Col="@currentCol"
+                              Value="@cellValue"
+                              IsFixed="@isFixed"
+                              IsSelected="@isSelected"
+                              OnSelected="@(async () => await SelectCell(currentRow, currentCol))" />
+            }
         }
-    }
+    </div>
+    
+    <div class="number-selector">
+        <div class="number-selector-title">Chiffres</div>
+        @for (int num = 1; num <= 9; num++)
+        {
+            var number = num;
+            <button class="number-btn" 
+                    @onclick="@(() => SetNumber(number))"
+                    disabled="@(!HasSelectedCell)"
+                    aria-label="@($"Insérer le chiffre {number}")">
+                @number
+            </button>
+        }
+        <button class="number-btn clear-btn" 
+                @onclick="@(() => SetNumber(0))"
+                disabled="@(!HasSelectedCell)"
+                aria-label="Effacer la cellule">
+            ✕
+        </button>
+    </div>
 </div>
 
 @code {
+    private int? _selectedRow;
+    private int? _selectedCol;
+    private ElementReference _wrapperElement;
+    private Grid? _previousGrid;
+
+    private bool HasSelectedCell => _selectedRow.HasValue && _selectedCol.HasValue;
+
     [Parameter]
     public Grid Grid { get; set; } = null!;
 
@@ -28,5 +59,83 @@
 
     [Parameter]
     public EventCallback<(int row, int col, int value)> OnCellValueChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (_previousGrid == Grid) return;
+        ClearSelection();
+        _previousGrid = Grid;
+    }
+
+    private async Task SelectCell(int row, int col)
+    {
+        _selectedRow = row;
+        _selectedCol = col;
+        await _wrapperElement.FocusAsync();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (!HasSelectedCell)
+            return;
+
+        bool isFixedCell = FixedCells?[_selectedRow!.Value, _selectedCol!.Value] == true;
+
+        // Handle number keys 1-9 (only for non-fixed cells)
+        if (!isFixedCell && e.Key.Length == 1 && e.Key[0] >= '1' && e.Key[0] <= '9')
+        {
+            int number = e.Key[0] - '0';
+            await OnCellValueChanged.InvokeAsync((_selectedRow!.Value, _selectedCol!.Value, number));
+            StateHasChanged();
+        }
+        // Handle Delete, Backspace, or 0 to clear cell (only for non-fixed cells)
+        else if (!isFixedCell && e.Key is "Delete" or "Backspace" or "0")
+        {
+            await OnCellValueChanged.InvokeAsync((_selectedRow!.Value, _selectedCol!.Value, 0));
+            StateHasChanged();
+        }
+        // Handle arrow keys for navigation (always allowed)
+        else if (e.Key is "ArrowUp" or "ArrowDown" or "ArrowLeft" or "ArrowRight")
+        {
+            int newRow = _selectedRow!.Value;
+            int newCol = _selectedCol!.Value;
+
+            switch (e.Key)
+            {
+                case "ArrowUp": newRow = Math.Max(0, newRow - 1); break;
+                case "ArrowDown": newRow = Math.Min(8, newRow + 1); break;
+                case "ArrowLeft": newCol = Math.Max(0, newCol - 1); break;
+                case "ArrowRight": newCol = Math.Min(8, newCol + 1); break;
+            }
+
+            _selectedRow = newRow;
+            _selectedCol = newCol;
+            StateHasChanged();
+        }
+        // Handle Escape to clear selection
+        else if (e.Key == "Escape")
+        {
+            ClearSelection();
+            StateHasChanged();
+        }
+    }
+
+    private async Task SetNumber(int number)
+    {
+        if (!HasSelectedCell)
+            return;
+
+        if (FixedCells?[_selectedRow!.Value, _selectedCol!.Value] == true)
+            return;
+
+        await OnCellValueChanged.InvokeAsync((_selectedRow!.Value, _selectedCol!.Value, number));
+        StateHasChanged();
+    }
+
+    public void ClearSelection()
+    {
+        _selectedRow = null;
+        _selectedCol = null;
+    }
 }
 

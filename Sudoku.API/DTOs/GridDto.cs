@@ -5,11 +5,8 @@ namespace Sudoku.API.DTOs;
 public class GridDto : IValidatableObject
 {
     /// <summary>
-    /// Matrice 9x9 des cellules du Sudoku
+    /// Constructeur par défaut qui initialise une grille 9x9 avec des cellules vides.
     /// </summary>
-    [Required(ErrorMessage = "La grille est requise")]
-    public CellDto[][] Cells { get; set; } = new CellDto[9][];
-
     public GridDto()
     {
         for (var i = 0; i < 9; i++)
@@ -20,6 +17,21 @@ public class GridDto : IValidatableObject
                 Cells[i][j] = new CellDto();
             }
         }
+    }
+
+    /// <summary>
+    /// Matrice 9x9 des cellules du Sudoku
+    /// </summary>
+    [Required(ErrorMessage = "La grille est requise")]
+    public CellDto[][] Cells { get; set; } = new CellDto[9][];
+
+    /// <summary>
+    /// Crée une grille vide avec toutes les cellules initialisées.
+    /// </summary>
+    [Obsolete("Utilisez le constructeur par défaut à la place.")]
+    public static GridDto CreateEmpty()
+    {
+        return new GridDto();
     }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

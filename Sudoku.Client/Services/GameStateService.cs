@@ -14,6 +14,7 @@ public class GameStateService
     public event Action? OnStateChanged;
 
     public Grid? CurrentGrid { get; private set; }
+    public Grid? InitialGrid => _initialGrid;
     public bool[,]? FixedCells { get; private set; }
     public bool IsGameActive { get; private set; }
 

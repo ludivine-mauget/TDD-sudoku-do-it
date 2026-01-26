@@ -114,7 +114,7 @@ public class SudokuServiceValidationTests
 
     private static GridDto CreateEmptyGridDto()
     {
-        return new GridDto(); // Le constructeur crée déjà une grille 9x9 avec des CellDto vides
+        return new GridDto();
     }
 
     private static GridDto ConvertGridToDto(Grid grid)

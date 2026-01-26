@@ -73,21 +73,34 @@
     font-size: 28px;
 }
 
+.sudoku-game-wrapper {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 20px auto;
+}
+
 .sudoku-grid {
     display: grid;
     grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr);
     gap: 0;
-    width: 450px;
-    height: 450px;
-    margin: 20px auto;
-    border: 3px solid #333;
+    width: min(450px, 90vw);
+    height: min(450px, 90vw);
+    max-width: 450px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     background: white;
+    border: 3px solid #333;
 }
 
 .cell {
-    width: 50px;
-    height: 50px;
+    width: 100%;
+    height: 100%;
+    /* Fallback for browsers that don't support aspect-ratio (pre-2021) */
+    /* The grid already ensures equal width/height via grid-template-columns/rows */
+    padding-bottom: 0; /* Reset any padding */
+    aspect-ratio: 1; /* Modern browsers */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -97,12 +110,29 @@
     cursor: pointer;
     transition: background-color 0.2s;
     position: relative;
+    box-sizing: border-box;
 }
 
+/* Fallback for older browsers without aspect-ratio support */
+@supports not (aspect-ratio: 1) {
+    .cell {
+        height: auto;
+    }
+    
+    .cell::before {
+        content: "";
+        display: block;
+        padding-top: 100%; /* Creates 1:1 aspect ratio */
+    }
+}
+
+/* Bordures épaisses pour la séparation des blocs 3x3 */
+/* Colonnes 3 et 6 (indices 3n, excluant la dernière colonne 9) */
 .cell:nth-child(3n):not(:nth-child(9n)) {
     border-right: 2px solid #333;
 }
 
+/* Lignes 3 et 6 (cellules 19-27 et 46-54) */
 .cell:nth-child(n + 19):nth-child(-n + 27),
 .cell:nth-child(n + 46):nth-child(-n + 54) {
     border-bottom: 2px solid #333;
@@ -118,8 +148,9 @@
     background-color: #e3f2fd;
 }
 
-.cell.editing {
+.cell.selected {
     background-color: #bbdefb;
+    box-shadow: inset 0 0 0 3px #2196f3;
 }
 
 .cell-input {
@@ -248,5 +279,162 @@
 
 .game-header {
     margin-bottom: 20px;
+}
+
+/* Number Selector Panel */
+.number-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.number-selector-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.number-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+    font-weight: bold;
+    border: 2px solid #2196f3;
+    border-radius: 8px;
+    background: white;
+    color: #2196f3;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.number-btn:hover:not(:disabled) {
+    background: #2196f3;
+    color: white;
+    transform: scale(1.05);
+}
+
+.number-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.number-btn.disabled,
+.number-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #ccc;
+    color: #ccc;
+}
+
+.number-btn.clear-btn {
+    border-color: #e74c3c;
+    color: #e74c3c;
+    font-size: 18px;
+}
+
+.number-btn.clear-btn:hover:not(:disabled) {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 600px) {
+    .sudoku-game-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .sudoku-grid {
+        width: min(350px, 95vw);
+        height: min(350px, 95vw);
+        max-width: 350px;
+    }
+
+    .cell {
+        font-size: 16px;
+    }
+
+    .cell-input {
+        font-size: 16px;
+    }
+
+    .number-selector {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 350px;
+    }
+
+    .number-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .difficulty-btn {
+        padding: 10px 18px;
+        font-size: 14px;
+    }
+
+    .timer {
+        font-size: 20px;
+        padding: 8px 16px;
+    }
+}
+
+@media (max-width: 400px) {
+    .sudoku-grid {
+        width: min(280px, 95vw);
+        height: min(280px, 95vw);
+        max-width: 280px;
+        border-width: 2px;
+    }
+
+    .cell {
+        font-size: 14px;
+    }
+
+    .cell-input {
+        font-size: 14px;
+    }
+
+    .number-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .sudoku-grid {
+        width: 540px;
+        height: 540px;
+        max-width: 540px;
+    }
+
+    .cell {
+        font-size: 24px;
+    }
+
+    .cell-input {
+        font-size: 24px;
+    }
+
+    .number-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 24px;
+    }
 }
 
