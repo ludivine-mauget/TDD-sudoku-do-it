@@ -7,6 +7,11 @@ on:
     branches: [ main, master, develop ]
   workflow_dispatch:
 
+# Évite les exécutions concurrentes sur la même branche (économise des ressources)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   DOTNET_VERSION: '9.0.x'
   REGISTRY: ghcr.io
@@ -18,10 +23,18 @@ jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    permissions:
+      contents: read
+      actions: read
+      checks: write
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Nécessaire pour l'analyse de couverture et les tags
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -43,7 +56,7 @@ jobs:
         run: dotnet build Sudoku.sln --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test Sudoku.Tests/Sudoku.Tests.csproj --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
+        run: dotnet test Sudoku.Tests/Sudoku.Tests.csproj --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -53,6 +66,15 @@ jobs:
           path: ./TestResults
           retention-days: 30
 
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1.9.1
+        if: always()
+        with:
+          name: .NET Tests
+          path: ./TestResults/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         if: always()
@@ -61,16 +83,39 @@ jobs:
           directory: ./TestResults
           fail_ci_if_error: false
 
+      # Génère un badge de couverture
+      - name: Code Coverage Summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        if: always()
+        with:
+          filename: ./TestResults/**/coverage.cobertura.xml
+          badge: true
+          format: markdown
+          output: both
+          thresholds: '60 80'
+
   # ==================== BUILD DOCKER IMAGES ====================
   build-docker-images:
     name: Build Docker Images
     runs-on: ubuntu-latest
     needs: build-and-test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    timeout-minutes: 20
     
     permissions:
       contents: read
       packages: write
+      security-events: write  # Pour les rapports de sécurité
+
+    strategy:
+      matrix:
+        include:
+          - image: api
+            dockerfile: ./Sudoku.API/Dockerfile
+            image_name: sudoku-api
+          - image: client
+            dockerfile: ./Sudoku.Client/Dockerfile
+            image_name: sudoku-client
 
     steps:
       - name: Checkout code
@@ -86,54 +131,53 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata for API image
-        id: meta-api
+      - name: Extract metadata for ${{ matrix.image }} image
+        id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image_name }}
           tags: |
             type=ref,event=branch
             type=sha,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
-      - name: Build and push API image
+      - name: Build and push ${{ matrix.image }} image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Sudoku.API/Dockerfile
+          file: ${{ matrix.dockerfile }}
           push: true
-          tags: ${{ steps.meta-api.outputs.tags }}
-          labels: ${{ steps.meta-api.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # Pour activer le support ARM64 (Apple Silicon, instances cloud ARM), décommentez :
+          # platforms: linux/amd64,linux/arm64
 
-      - name: Extract metadata for Client image
-        id: meta-client
-        uses: docker/metadata-action@v5
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
         with:
-          images: ${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix=
-            type=raw,value=latest,enable={{is_default_branch}}
+          # Utilise le digest de l'image pour scanner exactement l'image qui vient d'être construite
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image_name }}@${{ steps.build.outputs.digest }}
+          format: 'sarif'
+          output: 'trivy-results-${{ matrix.image }}.sarif'
+          severity: 'CRITICAL,HIGH'
 
-      - name: Build and push Client image
-        uses: docker/build-push-action@v5
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
         with:
-          context: .
-          file: ./Sudoku.Client/Dockerfile
-          push: true
-          tags: ${{ steps.meta-client.outputs.tags }}
-          labels: ${{ steps.meta-client.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          sarif_file: 'trivy-results-${{ matrix.image }}.sarif'
 
   # ==================== SECURITY SCAN ====================
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
     needs: build-and-test
-    if: github.event_name == 'push'
+    timeout-minutes: 10
     
     steps:
       - name: Checkout code
@@ -144,25 +188,50 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore Sudoku.sln
+
       - name: Run security scan
         run: |
-          dotnet tool install --global security-scan --version 5.6.3 || true
-          dotnet restore Sudoku.sln
-          # Scan for vulnerable packages
-          dotnet list package --vulnerable --include-transitive 2>&1 | tee security-report.txt || true
+          echo "## 🔒 Security Scan Results" > security-report.md
+          echo "" >> security-report.md
+          echo "### Vulnerable Packages" >> security-report.md
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee -a security-report.md || true
+          echo "" >> security-report.md
+          echo "### Deprecated Packages" >> security-report.md
+          dotnet list package --deprecated 2>&1 | tee -a security-report.md || true
+          echo "" >> security-report.md
+          echo "### Outdated Packages" >> security-report.md
+          dotnet list package --outdated 2>&1 | tee -a security-report.md || true
 
       - name: Upload security report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-report
-          path: security-report.txt
+          path: security-report.md
           retention-days: 30
+
+      - name: Add security report to PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: security-scan
+          path: security-report.md
 
   # ==================== CODE QUALITY ====================
   code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     steps:
       - name: Checkout code
@@ -173,11 +242,22 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Restore dependencies
         run: dotnet restore Sudoku.sln
 
       - name: Check code formatting
         run: dotnet format Sudoku.sln --verify-no-changes --verbosity diagnostic
+
+      - name: Run code analyzers
+        run: dotnet build Sudoku.sln --configuration Release --no-restore /p:TreatWarningsAsErrors=false /p:RunAnalyzers=true
 
   # ==================== DEPLOY (OPTIONAL) ====================
   deploy:
