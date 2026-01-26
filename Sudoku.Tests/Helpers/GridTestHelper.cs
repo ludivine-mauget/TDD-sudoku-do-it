@@ -15,15 +15,15 @@ public static class GridTestHelper
     public static Grid CreateGridWithValues(Dictionary<(int row, int col), int> initialValues)
     {
         var grid = new Grid();
-        
+
         foreach (var (position, value) in initialValues)
         {
             grid.SetCellValue(position, value);
         }
-        
+
         return grid;
     }
-    
+
     /// <summary>
     /// Calculates the actual possibilities for a cell by intersecting
     /// subgrid, row, and column possibilities.
@@ -36,7 +36,7 @@ public static class GridTestHelper
         var subGridPossibilities = grid.GetSubGridPossibilities(position);
         var rowPossibilities = grid.GetRowPossibilities(position.row);
         var colPossibilities = grid.GetColumnPossibilities(position.col);
-        
+
         // Intersection of all three bool arrays
         var actualPossibilities = new HashSet<int>();
         for (int i = 1; i <= 9; i++)
@@ -46,7 +46,7 @@ public static class GridTestHelper
                 actualPossibilities.Add(i);
             }
         }
-        
+
         return actualPossibilities;
     }
 }

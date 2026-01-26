@@ -1,54 +1,97 @@
-# 🎮 Sudoku Generator & Solver
+# 🎮 Sudoku - Application Complète
 
-Application console interactive de génération et résolution de grilles Sudoku, développée en **Test-Driven Development (TDD)**.
+Application Sudoku complète avec générateur, solveur, API REST et interface web Blazor WebAssembly, développée en **Test-Driven Development (TDD)**.
 
 ## 🚀 Démarrage Rapide
 
+### Lancer l'application web complète
+
 ```bash
+# Script automatique (démarre API + Client)
+./start-full-app.sh
+```
+
+Ou manuellement :
+
+```bash
+# Terminal 1 - API
+cd Sudoku.API
+dotnet run
+
+# Terminal 2 - Client Blazor
+cd Sudoku.Client
+dotnet run
+```
 # Cloner le projet
 git clone git@github.com:ludivine-mauget/TDD-sudoku-do-it.git
 
-# Aller dans le répertoire
-cd Path/To/Sudoku
+Ensuite, ouvrez votre navigateur à l'URL affichée (généralement `http://localhost:5xxx`)
 
-# Installer dotnet 9.0 si nécessaire
-# https://dotnet.microsoft.com/en-us/download/dotnet/9.0
+### Lancer l'application console
 
-# Lancer l'application
+```bash
+# Lancer l'application console interactive
 dotnet run --project Sudoku
 
 # Lancer les tests
 dotnet test
 ```
 
+📖 **Pour plus de détails, consultez [`QUICK_START.md`](QUICK_START.md)**
+
 ## ✨ Fonctionnalités
 
-### Menu Interactif
+### 🌐 Application Web (Blazor WASM) - **NOUVEAU !**
+
+- 🎨 **Interface interactive** : Cliquez pour modifier les cellules
+- 🎲 **4 niveaux de difficulté** : Facile, Moyen, Difficile, Expert
+- 💡 **Résolution automatique** : Obtenez la solution instantanément
+- ✅ **Validation** : Vérifiez votre solution en temps réel
+- ↶↷ **Undo/Redo** : Annulez et refaites vos mouvements
+- ⏱️ **Chronomètre** : Suivez votre temps de jeu
+- 📱 **Responsive** : Jouez sur mobile, tablette ou desktop
+
+### 🖥️ Application Console
 
 - 🎲 **Générer un puzzle** : Créez une grille Sudoku avec solution unique
 - 🧩 **Générer et résoudre** : Créez un puzzle puis résolvez-le automatiquement
 - 🔄 **Comparaison** : Affichez le puzzle et sa solution côte à côte
 - 🎯 **Difficulté personnalisable** : Choisissez le nombre de cellules vides (20-60+)
 
-![alt text](image-1.png)
+![Application Console](image-1.png)
 
-### Affichage Console Élégant
+### 🔌 API REST
 
-![alt text](image.png)
+- `POST /api/sudoku/generate` - Génère une nouvelle grille
+- `POST /api/sudoku/solve` - Résout une grille
+- `POST /api/sudoku/validate` - Valide une grille
 
 ## 🏗️ Architecture
 
 ```plaintext
 Sudoku/
-├── Display/         → Affichage console des grilles
-│   └── GridDisplay.cs
-├── Models/          → Structures de données
-│   ├── Cell.cs
-│   └── Grid.cs
-├── Solver/          → Algorithme de résolution (backtracking)
-│   └── Solver.cs
-├── Generator/       → Génération de grilles
-│   └── Generator.cs
+├── Sudoku/              # Bibliothèque de base
+│   ├── Models/          # Structures de données (Cell, Grid)
+│   ├── Solver/          # Algorithme de résolution (backtracking)
+│   ├── Generator/       # Génération de grilles
+│   └── Display/         # Affichage console
+│
+├── Sudoku.API/          # API REST (ASP.NET Core)
+│   ├── Controllers/     # Endpoints API
+│   ├── Services/        # Logique métier
+│   └── DTOs/            # Objets de transfert
+│
+├── Sudoku.Client/       # Client Blazor WebAssembly ✨
+│   ├── Components/      # Composants Razor réutilisables
+│   ├── Pages/           # Pages de l'application
+│   ├── Services/        # API Client + Game State
+│   └── wwwroot/         # Ressources statiques (CSS, images)
+│
+└── Sudoku.Tests/        # Tests unitaires
+    ├── GridTests.cs
+    ├── SolverTests.cs
+    └── GeneratorTests.cs
+```
 └── Program.cs       → Application console avec menu
 
 Sudoku.Tests/

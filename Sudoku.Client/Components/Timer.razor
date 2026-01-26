@@ -1,0 +1,38 @@
+@implements IDisposable
+
+<div class="timer">
+    <span class="timer-icon">⏱️</span>
+    <span class="timer-value">@FormatTime(ElapsedTime)</span>
+</div>
+
+@code {
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    [Parameter]
+    public TimeSpan ElapsedTime { get; set; }
+
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        _timer = new System.Threading.Timer(_ =>
+        {
+            if (IsActive)
+            {
+                InvokeAsync(StateHasChanged);
+            }
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+    }
+
+    private string FormatTime(TimeSpan time)
+    {
+        return $"{(int)time.TotalMinutes:D2}:{time.Seconds:D2}";
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}
+

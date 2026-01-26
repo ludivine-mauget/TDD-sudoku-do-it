@@ -188,7 +188,7 @@ public static class SudokuGridTestData
             { (8, 0), 4 }, { (8, 1), 1 }, { (8, 2), 9 }, { (8, 3), 5 }, { (8, 4), 7 }, { (8, 5), 2 }, { (8, 6), 3 }, { (8, 7), 8 }, { (8, 8), 6 }
         };
     }
-    
+
     public static class TestHardGridToSolve
     {
         public static readonly Dictionary<(int row, int col), int> InitialValues = new()
@@ -254,7 +254,7 @@ public static class SudokuGridTestData
             { (8, 0), 9 }, { (8, 1), 4 }, { (8, 2), 3 }, { (8, 3), 5 }, { (8, 4), 8 }, { (8, 5), 6 }, { (8, 6), 7 }, { (8, 7), 1 }, { (8, 8), 2 }
         };
     }
-    
+
     public static class TestGridWithNoSolution
     {
         public static readonly Dictionary<(int row, int col), int> InitialValues = new()
@@ -266,7 +266,7 @@ public static class SudokuGridTestData
             { (1, 0), 1 } // Duplicate '1' in the first column to create no solution scenario
         };
     }
-    
+
     public static class TestGridWithMultipleSolutions
     {
         /// <summary>

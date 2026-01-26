@@ -482,3 +482,10 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Project planning documents
+PLAN.md
+
+# Keep startup scripts
+!start-api.sh
+
