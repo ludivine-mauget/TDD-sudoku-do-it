@@ -9,7 +9,7 @@ public class GridDto : IValidatableObject
     /// </summary>
     [Required(ErrorMessage = "La grille est requise")]
     public CellDto[][] Cells { get; set; } = new CellDto[9][];
-    
+
     public GridDto()
     {
         for (var i = 0; i < 9; i++)
@@ -21,7 +21,7 @@ public class GridDto : IValidatableObject
             }
         }
     }
-    
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Cells.Length != 9)

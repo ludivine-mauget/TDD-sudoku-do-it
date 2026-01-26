@@ -17,7 +17,7 @@ public class SudokuRequestDto
     /// </summary>
     [EnumDataType(typeof(DifficultyLevel))]
     public DifficultyLevel Difficulty { get; set; } = DifficultyLevel.Medium;
-    
+
     /// <summary>
     /// Nombre de cellules à retirer (optionnel, surcharge la difficulté)
     /// </summary>

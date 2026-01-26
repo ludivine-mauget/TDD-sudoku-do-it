@@ -7,8 +7,8 @@ namespace Sudoku.Generator;
 public static class Generator
 {
     private static readonly Solver.Solver SolverInstance = new();
-    
-    public static Grid  GenerateFullGrid()
+
+    public static Grid GenerateFullGrid()
     {
         var grid = new Grid();
         FillGridRecursive(grid);
@@ -18,7 +18,7 @@ public static class Generator
     private static void FillGridRecursive(Grid grid)
     {
         var emptyCell = Solver.Solver.FindEmptyCell(grid);
-        
+
         if (emptyCell == null)
         {
             return;
@@ -56,7 +56,7 @@ public static class Generator
 
         return puzzleGrid;
     }
-    
+
     public static Grid GeneratePuzzleWithUniqueSolution(Grid fullGrid, int cellsToRemove)
     {
         var puzzleGrid = new Grid(fullGrid);

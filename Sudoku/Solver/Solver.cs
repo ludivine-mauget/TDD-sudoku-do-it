@@ -14,7 +14,7 @@ public class Solver
     private static bool SolveRecursive(Grid grid)
     {
         var emptyCell = FindEmptyCell(grid);
-        
+
         if (emptyCell == null)
         {
             return true;
@@ -25,7 +25,7 @@ public class Solver
         for (var num = GridConstants.MinValue; num <= GridConstants.MaxValue; num++)
         {
             if (!IsValidPlacement(grid, (row, col), num)) continue;
-            
+
             grid.SetCellValue((row, col), num);
             if (SolveRecursive(grid))
             {
@@ -98,9 +98,9 @@ public class Solver
         // Early-exit : arrêter dès qu'on a atteint le maximum demandé
         if (count >= maxSolutions)
             return;
-            
+
         var emptyCell = FindEmptyCell(gridCopy);
-        
+
         if (emptyCell == null)
         {
             count++;
@@ -114,9 +114,9 @@ public class Solver
             // Early-exit dans la boucle aussi
             if (count >= maxSolutions)
                 return;
-                
+
             if (!IsValidPlacement(gridCopy, (row, col), num)) continue;
-            
+
             gridCopy.SetCellValue((row, col), num);
             CountSolutionsRecursive(gridCopy, ref count, maxSolutions);
             ResetCell(gridCopy, (row, col));

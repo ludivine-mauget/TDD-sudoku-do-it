@@ -86,9 +86,9 @@ public class SudokuController(ISudokuService sudokuService, ILogger<SudokuContro
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<object> HealthCheck()
     {
-        return Ok(new 
-        { 
-            status = "healthy", 
+        return Ok(new
+        {
+            status = "healthy",
             message = "L'API Sudoku fonctionne correctement",
             timestamp = DateTime.UtcNow
         });

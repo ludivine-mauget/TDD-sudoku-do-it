@@ -91,7 +91,7 @@ public class ValidationTests
     {
         // Arrange - Créer une grille complète mais invalide
         var grid = new Grid();
-        
+
         // Remplir toute la grille avec le chiffre 1 (invalide)
         for (var row = 0; row < 9; row++)
         {

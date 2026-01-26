@@ -92,7 +92,7 @@ public class SudokuServiceValidationTests
     {
         // Arrange - Créer une grille complète mais invalide
         var gridDto = CreateEmptyGridDto();
-        
+
         // Remplir toute la grille avec le chiffre 1 (invalide)
         for (var row = 0; row < 9; row++)
         {

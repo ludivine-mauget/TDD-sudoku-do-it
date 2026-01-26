@@ -6,7 +6,7 @@ public class Grid
 {
 
     private Cell[,] Cells { get; set; } = new Cell[GridConstants.GridSize, GridConstants.GridSize];
-    
+
     public Grid()
     {
         for (var row = 0; row < GridConstants.GridSize; row++)
@@ -44,12 +44,12 @@ public class Grid
     {
         var subGridCells = GetSubgridCells(position);
         var possibilities = new bool[GridConstants.MaxValue + 1];
-        
+
         for (var i = GridConstants.MinValue; i <= GridConstants.MaxValue; i++)
         {
             possibilities[i] = true;
         }
-        
+
         for (var row = 0; row < GridConstants.SubGridSize; row++)
         {
             for (var col = 0; col < GridConstants.SubGridSize; col++)
@@ -60,19 +60,19 @@ public class Grid
                 }
             }
         }
-        
+
         return possibilities;
     }
-    
+
     public bool[] GetRowPossibilities(int positionRow)
     {
         var possibilities = new bool[GridConstants.MaxValue + 1];
-        
+
         for (var i = GridConstants.MinValue; i <= GridConstants.MaxValue; i++)
         {
             possibilities[i] = true;
         }
-        
+
         for (var col = 0; col < GridConstants.GridSize; col++)
         {
             if (Cells[positionRow, col].Number.HasValue)
@@ -80,19 +80,19 @@ public class Grid
                 possibilities[Cells[positionRow, col].Number!.Value] = false;
             }
         }
-        
+
         return possibilities;
     }
 
     public bool[] GetColumnPossibilities(int positionCol)
     {
         var possibilities = new bool[GridConstants.MaxValue + 1];
-        
+
         for (var i = GridConstants.MinValue; i <= GridConstants.MaxValue; i++)
         {
             possibilities[i] = true;
         }
-        
+
         for (var row = 0; row < GridConstants.GridSize; row++)
         {
             if (Cells[row, positionCol].Number.HasValue)
@@ -100,7 +100,7 @@ public class Grid
                 possibilities[Cells[row, positionCol].Number!.Value] = false;
             }
         }
-        
+
         return possibilities;
     }
 
@@ -110,12 +110,12 @@ public class Grid
         {
             throw new InvalidOperationException("Cell already has a value.");
         }
-        
+
         if (valueToSet < GridConstants.MinValue || valueToSet > GridConstants.MaxValue)
         {
             throw new ArgumentOutOfRangeException(nameof(valueToSet), $"Value must be between {GridConstants.MinValue} and {GridConstants.MaxValue}.");
         }
-        
+
         Cells[position.row, position.col].Number = valueToSet;
         Cells[position.row, position.col].ClearPossibilities();
     }
@@ -126,7 +126,7 @@ public class Grid
         {
             throw new InvalidOperationException("Cell is already empty.");
         }
-        
+
         Cells[position.row, position.col].Number = null;
         Cells[position.row, position.col].InitializeAllPossibilities();
     }
@@ -151,7 +151,7 @@ public class Grid
         }
         return true;
     }
-    
+
     /// <summary>
     /// Vérifie si la grille respecte les règles du Sudoku (pas de doublons dans les lignes, colonnes et sous-grilles).
     /// </summary>
@@ -175,7 +175,7 @@ public class Grid
                 }
             }
         }
-        
+
         // Vérifier toutes les colonnes
         for (var col = 0; col < GridConstants.GridSize; col++)
         {
@@ -193,7 +193,7 @@ public class Grid
                 }
             }
         }
-        
+
         // Vérifier toutes les sous-grilles 3x3
         for (var boxRow = 0; boxRow < GridConstants.SubGridSize; boxRow++)
         {
@@ -219,10 +219,10 @@ public class Grid
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     /// <summary>
     /// Vérifie si toutes les cellules de la grille sont remplies.
     /// </summary>
@@ -241,7 +241,7 @@ public class Grid
         }
         return true;
     }
-    
+
     /// <summary>
     /// Vérifie si la grille est résolue (complète ET valide).
     /// </summary>
@@ -250,7 +250,7 @@ public class Grid
     {
         return IsComplete() && IsValid();
     }
-    
+
     private Cell[,] GetSubgridCells((int row, int col) position)
     {
         var subGridCells = new Cell[GridConstants.SubGridSize, GridConstants.SubGridSize];
@@ -270,13 +270,13 @@ public class Grid
     {
         if (row < 0 || row >= GridConstants.GridSize)
             throw new ArgumentOutOfRangeException(nameof(row), $"Row must be between 0 and {GridConstants.GridSize - 1}.");
-        
+
         if (col < 0 || col >= GridConstants.GridSize)
             throw new ArgumentOutOfRangeException(nameof(col), $"Column must be between 0 and {GridConstants.GridSize - 1}.");
-        
+
         if (value < 0 || value > GridConstants.MaxValue)
             throw new ArgumentOutOfRangeException(nameof(value), $"Value must be between 0 and {GridConstants.MaxValue}.");
-        
+
         Cells[row, col].Number = value == 0 ? null : value;
     }
 
@@ -284,10 +284,10 @@ public class Grid
     {
         if (row < 0 || row >= GridConstants.GridSize)
             throw new ArgumentOutOfRangeException(nameof(row), $"Row must be between 0 and {GridConstants.GridSize - 1}.");
-        
+
         if (col < 0 || col >= GridConstants.GridSize)
             throw new ArgumentOutOfRangeException(nameof(col), $"Column must be between 0 and {GridConstants.GridSize - 1}.");
-        
+
         return Cells[row, col].Number ?? 0;
     }
 }

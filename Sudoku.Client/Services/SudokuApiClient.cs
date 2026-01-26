@@ -17,22 +17,22 @@ public class SudokuApiClient(HttpClient httpClient, ILogger<SudokuApiClient> log
         try
         {
             var response = await httpClient.PostAsJsonAsync("/api/sudoku/generate", new { cellsToRemove = difficulty });
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = $"Erreur serveur: {response.StatusCode}";
                 logger.LogWarning("Échec de génération: {StatusCode}", response.StatusCode);
                 return ApiResult<Grid>.Error(errorMessage);
             }
-            
+
             var result = await response.Content.ReadFromJsonAsync<GenerateResponse>(_jsonOptions);
             var grid = result?.Grid != null ? ConvertGridDtoToGrid(result.Grid) : null;
-            
+
             if (grid == null)
             {
                 return ApiResult<Grid>.Error("La réponse du serveur est invalide");
             }
-            
+
             return ApiResult<Grid>.Ok(grid);
         }
         catch (HttpRequestException ex)
@@ -58,28 +58,28 @@ public class SudokuApiClient(HttpClient httpClient, ILogger<SudokuApiClient> log
         {
             var gridDto = ConvertGridToGridDto(grid);
             var response = await httpClient.PostAsJsonAsync("/api/sudoku/solve", gridDto);
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = $"Erreur serveur: {response.StatusCode}";
                 logger.LogWarning("Échec de résolution: {StatusCode}", response.StatusCode);
                 return ApiResult<(bool, Grid)>.Error(errorMessage);
             }
-            
+
             var result = await response.Content.ReadFromJsonAsync<SolveResponse>(_jsonOptions);
-            
+
             if (result == null)
             {
                 return ApiResult<(bool, Grid)>.Error("La réponse du serveur est invalide");
             }
-            
+
             var solution = ConvertGridDtoToGrid(result.Grid);
-            
+
             if (solution == null)
             {
                 return ApiResult<(bool, Grid)>.Error("La réponse du serveur est invalide");
             }
-            
+
             return ApiResult<(bool, Grid)>.Ok((result.IsSolved, solution));
         }
         catch (HttpRequestException ex)
@@ -105,13 +105,13 @@ public class SudokuApiClient(HttpClient httpClient, ILogger<SudokuApiClient> log
         {
             var gridDto = ConvertGridToGridDto(grid);
             var response = await httpClient.PostAsJsonAsync("/api/sudoku/validate", gridDto);
-            
+
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogWarning("Échec de validation: {StatusCode}", response.StatusCode);
                 return ApiResult<bool>.Error($"Erreur serveur: {response.StatusCode}");
             }
-            
+
             var result = await response.Content.ReadFromJsonAsync<ValidationResponse>(_jsonOptions);
             return ApiResult<bool>.Ok(result?.IsValid ?? false);
         }

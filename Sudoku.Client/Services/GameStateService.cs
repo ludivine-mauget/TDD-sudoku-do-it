@@ -26,7 +26,7 @@ public class GameStateService
         CurrentGrid = grid.Clone();
         _initialGrid = grid.Clone();
         FixedCells = new bool[GridConstants.GridSize, GridConstants.GridSize];
-        
+
         for (var row = 0; row < GridConstants.GridSize; row++)
         {
             for (var col = 0; col < GridConstants.GridSize; col++)
@@ -49,7 +49,7 @@ public class GameStateService
             return;
 
         var oldValue = CurrentGrid.GetCellNumber(row, col);
-        
+
         // Supprimer tous les mouvements après le mouvement actuel (si on a fait undo)
         if (_currentMoveIndex < _moveHistory.Count - 1)
         {
